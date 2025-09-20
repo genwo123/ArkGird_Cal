@@ -16,12 +16,22 @@ function addGrid() {
     console.log('그리드 추가됨:', grid);
     console.log('현재 그리드 배열:', grids);
     updateGridList();
+    
+    // IndexedDB 자동 저장
+    if (dataManager.db) {
+        dataManager.saveGrids(grids);
+    }
 }
 
 function removeGrid(id) {
     grids = grids.filter(grid => grid.id !== id);
     console.log('그리드 삭제됨, 남은 그리드:', grids.length);
     updateGridList();
+    
+    // IndexedDB 자동 저장
+    if (dataManager.db) {
+        dataManager.saveGrids(grids);
+    }
 }
 
 function updateGridList() {
@@ -72,6 +82,11 @@ function clearAllGrids() {
         grids.length = 0;
         gridIdCounter = 1;
         updateGridList();
+        
+        // IndexedDB 자동 저장
+        if (dataManager.db) {
+            dataManager.saveGrids(grids);
+        }
         
         const resultSection = document.getElementById('resultSection');
         if (resultSection) {

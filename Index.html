@@ -4,13 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>아크 그리드 최적화 계산기</title>
+    <link rel="stylesheet" href="css/header-styles.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔮 아크 그리드 최적화 계산기</h1>
-            <p>최적의 젬 조합으로 최대 포인트를 얻어보세요!</p>
+            <div class="header-title">
+                <h1>🔮 아크 그리드 최적화 계산기</h1>
+                <p>최적의 젬 조합으로 최대 포인트를 얻어보세요!</p>
+            </div>
+            
+            <!-- 헤더 우측 데이터 관리 컨트롤 -->
+            <div class="header-controls">
+                <div class="auto-save-indicator">
+                    <div class="auto-save-dot"></div>
+                    <span>자동저장</span>
+                </div>
+                
+                <!-- 저장 관리 드롭다운 -->
+                <div class="save-dropdown">
+                    <button class="data-btn save-btn" onclick="toggleSaveMenu()">
+                        💾 저장관리 ▼
+                    </button>
+                    <div class="save-menu" id="saveMenu">
+                        <input type="text" class="save-version-input" id="saveVersion" placeholder="V1" maxlength="10">
+                        <button onclick="quickSave(); hideSaveMenu();">새로 저장</button>
+                        <button onclick="showLoadModal(); hideSaveMenu();">불러오기</button>
+                        <hr>
+                        <button onclick="dataManager.exportToJSON(); hideSaveMenu();">컴퓨터에 백업</button>
+                        <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImport(event); hideSaveMenu();">
+                        <button onclick="document.getElementById('importFile').click();">백업 파일 복원</button>
+                    </div>
+                </div>
+                
+                <!-- 빠른 저장 버튼 -->
+                <button class="data-btn quick-save-btn" onclick="quickSave()">
+                    💾 빠른저장
+                </button>
+            </div>
         </div>
 
         <div class="main-content">
@@ -117,8 +149,22 @@
         </div>
     </div>
 
+    <!-- 저장 파일 로드 모달 -->
+    <div id="loadModal" class="save-modal">
+        <div class="save-modal-content">
+            <h3>💾 저장된 파일 불러오기</h3>
+            <div id="saveFileList" class="save-file-list">
+                <!-- 저장 파일 목록이 여기에 표시됩니다 -->
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn btn-danger" onclick="hideLoadModal()">취소</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 스크립트 로드 순서 중요 -->
     <script src="js/utils.js"></script>
+    <script src="js/indexeddb-manager.js"></script>
     <script src="js/grid-manager.js"></script>
     <script src="js/gem-manager.js"></script>
     <script src="js/calculator.js"></script>

@@ -61,6 +61,11 @@ function addGem() {
     gems.push(gem);
     updateGemList();
     
+    // IndexedDB 자동 저장
+    if (dataManager.db) {
+        dataManager.saveGems(gems);
+    }
+    
     document.getElementById('gemEfficiency').value = 5;
     document.getElementById('gemPoint').value = 5;
 }
@@ -68,6 +73,11 @@ function addGem() {
 function removeGem(id) {
     gems = gems.filter(gem => gem.id !== id);
     updateGemList();
+    
+    // IndexedDB 자동 저장
+    if (dataManager.db) {
+        dataManager.saveGems(gems);
+    }
 }
 
 function updateGemList() {
@@ -101,6 +111,11 @@ function clearAllGems() {
         gems.length = 0;
         gemIdCounter = 1;
         updateGemList();
+        
+        // IndexedDB 자동 저장
+        if (dataManager.db) {
+            dataManager.saveGems(gems);
+        }
         
         const resultSection = document.getElementById('resultSection');
         resultSection.style.display = 'none';
