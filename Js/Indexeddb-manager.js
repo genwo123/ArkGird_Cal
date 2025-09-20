@@ -1,4 +1,3 @@
-// 개선된 IndexedDB 데이터 관리 클래스
 class DataManager {
     constructor() {
         this.dbName = 'ArkGridCalculator';

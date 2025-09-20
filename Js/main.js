@@ -4,7 +4,6 @@ let grids = [];
 let gemIdCounter = 1;
 let gridIdCounter = 1;
 
-// Page initialization
 window.onload = async function() {
     updateGemSubTypes();
     
@@ -15,6 +14,9 @@ window.onload = async function() {
         // 자동저장 설정 로드
         dataManager.loadSettings();
         updateAutoSaveIndicator();
+        
+        // 테마 설정 로드 (추가)
+        loadThemeSettings();
         
         // 저장된 데이터 로드
         const savedGems = await dataManager.loadGems();
@@ -118,6 +120,66 @@ function addExampleData() {
         dataManager.saveGems(gems);
     }
 }
+
+// 테마 토글 함수 (추가)
+function toggleTheme() {
+    const body = document.body;
+    const themeStylesheet = document.getElementById('theme-stylesheet');
+    const isDarkMode = body.classList.contains('dark-theme');
+    
+    if (isDarkMode) {
+        // 라이트 모드로 전환
+        body.classList.remove('dark-theme');
+        body.classList.add('light-theme');
+        themeStylesheet.href = 'css/light-theme.css';
+        localStorage.setItem('theme', 'light');
+    } else {
+        // 다크 모드로 전환
+        body.classList.remove('light-theme');
+        body.classList.add('dark-theme');
+        themeStylesheet.href = 'css/dark-theme.css';
+        localStorage.setItem('theme', 'dark');
+    }
+    
+    updateThemeIndicator();
+}
+
+// 테마 UI 업데이트 함수 (추가)
+function updateThemeIndicator() {
+    const dot = document.getElementById('themeDot');
+    const text = document.getElementById('themeText');
+    const indicator = document.querySelector('.theme-toggle-indicator');
+    const isDarkMode = document.body.classList.contains('dark-theme');
+    
+    if (isDarkMode) {
+        text.textContent = '다크모드 ON';
+        // 다크모드 스타일 적용
+    } else {
+        text.textContent = '라이트모드 ON';
+        // 라이트모드 스타일 적용
+    }
+}
+
+// 테마 설정 로드 함수 (추가)
+function loadThemeSettings() {
+    const savedTheme = localStorage.getItem('theme') || 'dark'; // 기본값 다크
+    const body = document.body;
+    const themeStylesheet = document.getElementById('theme-stylesheet');
+    
+    if (savedTheme === 'light') {
+        body.classList.remove('dark-theme');
+        body.classList.add('light-theme');
+        themeStylesheet.href = 'css/light-theme.css';
+    } else {
+        body.classList.remove('light-theme');
+        body.classList.add('dark-theme');
+        themeStylesheet.href = 'css/dark-theme.css';
+    }
+    
+    updateThemeIndicator();
+}
+
+
 
 // 자동저장 토글 함수
 function toggleAutoSave() {
