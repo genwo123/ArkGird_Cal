@@ -115,9 +115,9 @@ function addExampleData() {
     updateGemList();
     
     // 예제 데이터 저장
-    if (dataManager.db) {
-        dataManager.saveGrids(grids);
-        dataManager.saveGems(gems);
+    if (typeof dataManager !== 'undefined' && dataManager.db) {
+    dataManager.saveGrids(grids);
+    dataManager.saveGems(gems);
     }
 }
 
