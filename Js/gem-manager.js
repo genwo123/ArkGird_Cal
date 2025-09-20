@@ -13,16 +13,6 @@ function updateGemSubTypes() {
     
     if (gemType.value === 'order') {
         gemSubType.innerHTML = `
-            <option value="stable">안정 // 젬 관련 함수들
-
-function updateGemSubTypes() {
-    const gemType = document.getElementById('gemType').value;
-    const gemSubType = document.getElementById('gemSubType');
-    
-    gemSubType.innerHTML = '';
-    
-    if (gemType === 'order') {
-        gemSubType.innerHTML = `
             <option value="stable">안정 (기본 8)</option>
             <option value="solid">견고 (기본 9)</option>
             <option value="immutable">불변 (기본 10)</option>
