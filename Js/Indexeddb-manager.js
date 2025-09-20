@@ -9,6 +9,7 @@ class DataManager {
             GRIDS: 'grids', 
             SAVES: 'saves'
         };
+        this.autoSaveEnabled = false; // 기본값 OFF
         this.autoSaveInterval = null;
     }
 
@@ -20,8 +21,7 @@ class DataManager {
             request.onerror = () => reject(request.error);
             request.onsuccess = () => {
                 this.db = request.result;
-                console.log('🗄️ IndexedDB 초기화 완료');
-                this.startAutoSave(); // 자동 저장 시작
+                console.log('IndexedDB 초기화 완료');
                 resolve(this.db);
             };
 
@@ -50,16 +50,18 @@ class DataManager {
         });
     }
 
-    // 자동 저장 시작 (30초마다)
+    // 자동 저장 시작 (10분마다)
     startAutoSave() {
+        if (!this.autoSaveEnabled) return;
+        
         this.autoSaveInterval = setInterval(async () => {
             try {
                 await this.saveCurrentData();
-                console.log('🔄 자동 저장 완료');
+                console.log('자동 저장 완료');
             } catch (error) {
                 console.error('자동 저장 실패:', error);
             }
-        }, 30000); // 30초
+        }, 600000); // 10분 = 600초
     }
 
     // 자동 저장 중지
@@ -68,6 +70,28 @@ class DataManager {
             clearInterval(this.autoSaveInterval);
             this.autoSaveInterval = null;
         }
+    }
+
+    // 자동 저장 설정 토글
+    toggleAutoSave() {
+        this.autoSaveEnabled = !this.autoSaveEnabled;
+        
+        if (this.autoSaveEnabled) {
+            this.startAutoSave();
+            console.log('자동 저장 활성화');
+        } else {
+            this.stopAutoSave();
+            console.log('자동 저장 비활성화');
+        }
+        
+        localStorage.setItem('autoSaveEnabled', this.autoSaveEnabled.toString());
+        updateAutoSaveIndicator();
+    }
+
+    // 설정 로드
+    loadSettings() {
+        const saved = localStorage.getItem('autoSaveEnabled');
+        this.autoSaveEnabled = saved === 'true';
     }
 
     // 현재 데이터 저장
@@ -92,7 +116,7 @@ class DataManager {
                 await store.add(gem);
             }
             
-            console.log('💎 젬 저장:', gems.length + '개');
+            console.log('젬 저장:', gems.length + '개');
         } catch (error) {
             console.error('젬 저장 실패:', error);
         }
@@ -108,7 +132,7 @@ class DataManager {
                 const request = store.getAll();
                 request.onsuccess = () => {
                     const gems = request.result;
-                    console.log('💎 젬 로드:', gems.length + '개');
+                    console.log('젬 로드:', gems.length + '개');
                     resolve(gems);
                 };
                 request.onerror = () => reject(request.error);
@@ -131,7 +155,7 @@ class DataManager {
                 await store.add(grid);
             }
             
-            console.log('⚙️ 그리드 저장:', grids.length + '개');
+            console.log('그리드 저장:', grids.length + '개');
         } catch (error) {
             console.error('그리드 저장 실패:', error);
         }
@@ -147,7 +171,7 @@ class DataManager {
                 const request = store.getAll();
                 request.onsuccess = () => {
                     const grids = request.result;
-                    console.log('⚙️ 그리드 로드:', grids.length + '개');
+                    console.log('그리드 로드:', grids.length + '개');
                     resolve(grids);
                 };
                 request.onerror = () => reject(request.error);
@@ -228,9 +252,9 @@ class DataManager {
             };
             
             return new Promise((resolve, reject) => {
-                const request = store.put(saveData); // put을 사용해서 덮어쓰기 허용
+                const request = store.put(saveData);
                 request.onsuccess = () => {
-                    console.log('💾 저장 파일 생성:', saveFilename);
+                    console.log('저장 파일 생성:', saveFilename);
                     resolve(saveFilename);
                 };
                 request.onerror = () => reject(request.error);
@@ -292,7 +316,7 @@ class DataManager {
                         // 현재 데이터로 DB 업데이트
                         this.saveCurrentData();
                         
-                        console.log('📂 저장 파일 로드:', filename);
+                        console.log('저장 파일 로드:', filename);
                         resolve(request.result);
                     } else {
                         reject(new Error('저장 파일을 찾을 수 없습니다.'));
@@ -315,7 +339,7 @@ class DataManager {
             return new Promise((resolve, reject) => {
                 const request = store.delete(filename);
                 request.onsuccess = () => {
-                    console.log('🗑️ 저장 파일 삭제:', filename);
+                    console.log('저장 파일 삭제:', filename);
                     resolve();
                 };
                 request.onerror = () => reject(request.error);
@@ -343,7 +367,7 @@ class DataManager {
         link.download = `${saveFilename}.json`;
         link.click();
         
-        console.log('📤 JSON 내보내기:', saveFilename);
+        console.log('JSON 내보내기:', saveFilename);
     }
 
     // JSON 파일에서 가져오기
@@ -357,11 +381,9 @@ class DataManager {
                     // 데이터 구조 확인 및 변환
                     let simpleData;
                     if (importData.gems && importData.grids) {
-                        // 새 형식 또는 기존 형식
                         if (importData.counters) {
-                            simpleData = importData; // 이미 간소화된 형식
+                            simpleData = importData;
                         } else {
-                            // 기존 상세 형식을 간소화
                             simpleData = {
                                 gems: importData.gems.map(gem => ({
                                     id: gem.id,
@@ -388,20 +410,17 @@ class DataManager {
                     
                     const expandedData = this.expandData(simpleData);
                     
-                    // 전역 변수에 데이터 적용
                     gems = expandedData.gems;
                     grids = expandedData.grids;
                     gemIdCounter = expandedData.gemIdCounter;
                     gridIdCounter = expandedData.gridIdCounter;
                     
-                    // 화면 업데이트
                     updateGemList();
                     updateGridList();
                     
-                    // DB에 저장
                     await this.saveCurrentData();
                     
-                    console.log('📥 JSON 가져오기 완료');
+                    console.log('JSON 가져오기 완료');
                     resolve(importData);
                 } catch (error) {
                     reject(error);
@@ -422,7 +441,7 @@ class DataManager {
                 await store.clear();
             }
             
-            console.log('🧹 모든 데이터 삭제 완료');
+            console.log('모든 데이터 삭제 완료');
         } catch (error) {
             console.error('데이터 삭제 실패:', error);
         }

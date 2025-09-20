@@ -12,6 +12,10 @@ window.onload = async function() {
         // IndexedDB 초기화
         await dataManager.init();
         
+        // 자동저장 설정 로드
+        dataManager.loadSettings();
+        updateAutoSaveIndicator();
+        
         // 저장된 데이터 로드
         const savedGems = await dataManager.loadGems();
         const savedGrids = await dataManager.loadGrids();
@@ -115,6 +119,28 @@ function addExampleData() {
     }
 }
 
+// 자동저장 토글 함수
+function toggleAutoSave() {
+    dataManager.toggleAutoSave();
+}
+
+// 자동저장 UI 업데이트 함수
+function updateAutoSaveIndicator() {
+    const dot = document.getElementById('autoSaveDot');
+    const text = document.getElementById('autoSaveText');
+    const indicator = document.querySelector('.auto-save-indicator');
+    
+    if (dataManager.autoSaveEnabled) {
+        dot.classList.remove('disabled');
+        text.textContent = '자동저장 ON';
+        indicator.classList.remove('disabled');
+    } else {
+        dot.classList.add('disabled');
+        text.textContent = '자동저장 OFF';
+        indicator.classList.add('disabled');
+    }
+}
+
 // 헤더 데이터 관리 함수들
 async function quickSave() {
     try {
@@ -124,14 +150,14 @@ async function quickSave() {
         const filename = await dataManager.createSaveFile(null, version);
         
         // 성공 메시지 표시
-        showNotification(`💾 저장 완료: ${filename}`, 'success');
+        showNotification(`저장 완료: ${filename}`, 'success');
         
         // 버전 입력창 초기화
         versionInput.value = '';
         
     } catch (error) {
         console.error('저장 실패:', error);
-        showNotification('❌ 저장 실패: ' + error.message, 'error');
+        showNotification('저장 실패: ' + error.message, 'error');
     }
 }
 
@@ -150,7 +176,7 @@ async function showLoadModal() {
                     <div class="save-file-info">
                         ${save.date} | 젬: ${save.gemCount}개, 그리드: ${save.gridCount}개 | ${save.version}
                         <button onclick="event.stopPropagation(); deleteSaveFile('${save.filename}')" 
-                                style="float: right; color: #dc3545; background: none; border: none; cursor: pointer;">🗑️</button>
+                                style="float: right; color: #dc3545; background: none; border: none; cursor: pointer;">삭제</button>
                     </div>
                 </div>
             `).join('');
@@ -159,7 +185,7 @@ async function showLoadModal() {
         modal.style.display = 'flex';
     } catch (error) {
         console.error('저장 목록 로드 실패:', error);
-        showNotification('❌ 저장 목록 로드 실패: ' + error.message, 'error');
+        showNotification('저장 목록 로드 실패: ' + error.message, 'error');
     }
 }
 
@@ -171,10 +197,10 @@ async function loadSaveFile(filename) {
     try {
         await dataManager.loadSaveFile(filename);
         hideLoadModal();
-        showNotification(`📂 불러오기 완료: ${filename}`, 'success');
+        showNotification(`불러오기 완료: ${filename}`, 'success');
     } catch (error) {
         console.error('불러오기 실패:', error);
-        showNotification('❌ 불러오기 실패: ' + error.message, 'error');
+        showNotification('불러오기 실패: ' + error.message, 'error');
     }
 }
 
@@ -183,10 +209,10 @@ async function deleteSaveFile(filename) {
         try {
             await dataManager.deleteSaveFile(filename);
             showLoadModal(); // 목록 새로고침
-            showNotification(`🗑️ 삭제 완료: ${filename}`, 'success');
+            showNotification(`삭제 완료: ${filename}`, 'success');
         } catch (error) {
             console.error('삭제 실패:', error);
-            showNotification('❌ 삭제 실패: ' + error.message, 'error');
+            showNotification('삭제 실패: ' + error.message, 'error');
         }
     }
 }
@@ -196,12 +222,12 @@ async function handleImport(event) {
     if (file) {
         try {
             await dataManager.importFromJSON(file);
-            showNotification('📥 가져오기 완료!', 'success');
+            showNotification('가져오기 완료!', 'success');
             // 입력 초기화
             event.target.value = '';
         } catch (error) {
             console.error('가져오기 실패:', error);
-            showNotification('❌ 가져오기 실패: ' + error.message, 'error');
+            showNotification('가져오기 실패: ' + error.message, 'error');
         }
     }
 }

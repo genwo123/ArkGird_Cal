@@ -34,6 +34,21 @@ function getBaseWillpower(subType) {
     return basePowers[subType] || 8;
 }
 
+// 젬 서브타입에 따른 CSS 클래스 반환
+function getGemSubTypeClass(subType) {
+    switch(subType) {
+        // 질서 젬
+        case 'stable': return 'gem-stable';      // 안정
+        case 'solid': return 'gem-solid';        // 견고
+        case 'immutable': return 'gem-immutable'; // 불변
+        // 혼돈 젬
+        case 'erosion': return 'gem-erosion';     // 침식
+        case 'distortion': return 'gem-distortion'; // 왜곡
+        case 'collapse': return 'gem-collapse';   // 붕괴
+        default: return 'gem-default';
+    }
+}
+
 function addGem() {
     const type = document.getElementById('gemType').value;
     const subType = document.getElementById('gemSubType').value;
@@ -90,10 +105,13 @@ function updateGemList() {
         const gemItem = document.createElement('div');
         gemItem.className = 'gem-item';
         
+        const typeName = gem.type === 'order' ? '질서' : '혼돈';
+        const subTypeClass = getGemSubTypeClass(gem.subType);
+        
         gemItem.innerHTML = `
             <div class="gem-info">
-                <div class="gem-type ${gem.type}-type">
-                    ${gem.type === 'order' ? '질서' : '혼돈'} - ${getSubTypeName(gem.subType)}
+                <div class="gem-type ${gem.type}-type ${subTypeClass}">
+                    ${typeName} - ${getSubTypeName(gem.subType)}
                 </div>
                 <div class="gem-stats">기본 ${gem.baseWillpower} - 효율 ${gem.efficiency} = 필요 ${gem.need} | 포인트: ${gem.point}</div>
             </div>

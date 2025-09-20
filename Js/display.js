@@ -12,7 +12,7 @@ function displayOptimalResults(results) {
     const unusedGems = gems.filter(gem => !usedGemIds.has(gem.id));
     
     let html = `
-        <div class="total-points">📊 전체 총합: ${totalPoints}포인트</div>
+        <div class="total-points">📊 전체 결과</div>
         
         <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 25px; margin-bottom: 20px;">
             <h3 style="color: #fff; margin-bottom: 20px; text-align: center;">🔮 그리드별 젬 배치표</h3>
